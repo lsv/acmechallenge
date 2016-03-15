@@ -1,7 +1,22 @@
 #!/bin/bash
 
+DEBUG=true
 ROOTDIR="/root/certificates"
 DOMAIN="$1"
+
+DEBUG_CERTIFICATE="https://acme-staging.api.letsencrypt.org"
+CERTIFICATE="https://acme-v01.api.letsencrypt.org"
+CA=$CERTIFICATE
+
+if [ -z "$1" ]; then
+	echo "No domains supplied"
+	exit;
+fi
+
+if [ ! -z "$2" ]; then
+	echo "Using staging";
+	CA=$DEBUG_CERTIFICATE;
+fi
 
 if [ ! -d "./$DOMAIN" ]; then
 	mkdir ./$DOMAIN
@@ -15,7 +30,7 @@ if [ ! -f "./$DOMAIN/domain.csr" ]; then
 	openssl req -new -sha256 -key ./$DOMAIN/domain.key -subj "/CN=$DOMAIN" > ./$DOMAIN/domain.csr
 fi
 
-python $ROOTDIR/acme_tiny.py --account-key $ROOTDIR/account.key --csr $ROOTDIR/$DOMAIN/domain.csr --acme-dir /var/www/challenges/ > $ROOTDIR/$DOMAIN/signed.crt
+python $ROOTDIR/acme_tiny.py --ca $CA --account-key $ROOTDIR/account.key --csr $ROOTDIR/$DOMAIN/domain.csr --acme-dir /var/www/challenges/ > $ROOTDIR/$DOMAIN/signed.crt
 wget -O - https://letsencrypt.org/certs/lets-encrypt-x1-cross-signed.pem > /tmp/intermediate.pem
 cat $ROOTDIR/$DOMAIN/signed.crt /tmp/intermediate.pem > $ROOTDIR/$DOMAIN/chained.pem
 rm /tmp/intermediate.pem

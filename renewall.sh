@@ -1,9 +1,18 @@
 #!/bin/bash
 
+STAGING=false
+
+if [ ! -z "$1" ]; then
+        STAGING=true;
+fi
+
 for FILE in `ls -l`
 do
-    if test -d $FILE
-    then
-      ./renew.sh $FILE
+    if [ -d $FILE ]; then
+	if [ "$STAGING" = true ]; then
+		./renew.sh $FILE true
+	else
+		./renew.sh $FILE
+	fi
     fi
 done

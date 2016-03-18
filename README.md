@@ -22,3 +22,12 @@ location /.well-known/acme-challenge/ {
   try_files $uri =404;
 }
 ```
+
+nginx snippet
+
+```
+location /.well-known/acme-challenge/ {
+  alias /var/www/challenges/;
+  try_files $uri =404;
+}
+```
